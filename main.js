@@ -1,24 +1,26 @@
 const {
     app,
     BrowserWindow,
+    dialog
 } = require('electron')
-const path = require('path')
-const url = require('url')
+const url = require('url');
+const path = require('path');
+const request = require('request');
 
-app.on('ready', createWindow)
+app.on('ready', createWindow);
 
 app.on('window-all-closed', () => {
     // darwin = MacOS
     // if (process.platform !== 'darwin') {
-    app.quit()
+    app.quit();
     // }
-})
+});
 
 app.on('activate', () => {
     if (win === null) {
-        createWindow()
+        createWindow();
     }
-})
+});
 
 function createWindow() {
     // Create the browser window.
@@ -32,13 +34,13 @@ function createWindow() {
         webPreferences: {
             nodeIntegration: true
         }
-    })
+    });
 
     win.loadURL(url.format({
         pathname: path.join(__dirname, 'index.html'),
         protocol: 'file:',
         slashes: true
-    }))
+    }));
 
     // Open DevTools.
     // win.webContents.openDevTools()
@@ -50,4 +52,35 @@ function createWindow() {
         win = null
     })
 
+    // Check new version
+    request({url: 'https://github.com/CoolBANGstone/ex_Downloader-electron/releases/latest'}, function(err, resp, body) {
+        if (err || resp.statusCode !== 200)
+            return;
+        var keyword = '<span class=\"pl-2 flex-auto min-width-0 text-bold\">exDownloader-';
+        var index = body.indexOf(keyword) + keyword.length;
+        var current_version = app.getVersion();
+        var latest_version = '';
+        if (index < keyword.length)
+            return;
+        while (body[index] !== '.' || body[index + 1] !== 'd')
+            latest_version += body[index++];
+        if (current_version !== latest_version) {
+            const options = {
+                type: 'question',
+                buttons: [ 'Yes, please', 'No, thanks'],
+                defaultId: 0,
+                title: 'Question',
+                message: `Do you want to update?`,
+                detail: `New version ${latest_version} found.`,
+            };
+            dialog.showMessageBox(null, options, (response) => {
+                console.log(response);
+                if (response === 0) {
+                    // console.log('Update');
+                    win.loadURL('https://github.com/CoolBANGstone/ex_Downloader-electron/releases/latest');
+                    win.maximize();
+                }
+            });
+        }
+    })
 }
