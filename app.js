@@ -21,7 +21,7 @@ const action =  'Please select action:\n' +
                 'continue: Continue download(queue.txt)\n';
 UserAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:68.0) Gecko/20100101 Firefox/68.0';
 
-const down_path = path.join(downloadsfolder(), 'e(x)hentai_download');
+const down_path = path.join(downloadsfolder(), 'ex_Downloader');
 fs.mkdir(down_path, function(err) {});
 function input() {
     const input = document.getElementById('input');
