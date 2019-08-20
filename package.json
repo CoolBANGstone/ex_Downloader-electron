@@ -1,6 +1,6 @@
 {
   "name": "exDownloader",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "e(x)Hentai downloader",
   "main": "main.js",
   "scripts": {
