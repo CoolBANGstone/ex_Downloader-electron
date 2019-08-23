@@ -51,7 +51,9 @@ function createWindow() {
     win.on('closed', () => {
         win = null
     })
-
+    win.webContents.on('did-finish-load', () => {
+        win.webContents.send('download-folder', app.getPath('downloads'));
+    })
     // Check new version
     request({url: 'https://github.com/CoolBANGstone/ex_Downloader-electron/releases/latest'}, function(err, resp, body) {
         if (err || resp.statusCode !== 200)

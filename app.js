@@ -7,8 +7,7 @@ const request = require('request');
 const setCookie = require('set-cookie-parser');
 
 
-var downloadsfolder = require('downloads-folder');
-
+var down_path = '';
 var stage = 1;
 var username, pass, loggedin = false;
 var eORex = 2;
@@ -21,8 +20,6 @@ const action =  'Please select action:\n' +
                 'continue: Continue download(queue.txt)\n';
 UserAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:68.0) Gecko/20100101 Firefox/68.0';
 
-const down_path = path.join(downloadsfolder(), 'ex_Downloader');
-fs.mkdir(down_path, function(err) {});
 function input() {
     const input = document.getElementById('input');
     const out = document.querySelector('.output');

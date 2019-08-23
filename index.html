@@ -18,7 +18,6 @@
     </div>
     <div class="input" id="send">
         <input type="text" class="text_box" id="input" autofocus>
-        <!-- <button type="button" id="button" onclick="input()">Enter</button> -->
     </div>
     <div class="progress" id="progress"></div>
     <div class="limit" id="limit"></div>
@@ -37,7 +36,10 @@
                 input();
                     // document.getElementById("button").click();
         });
-
+        require('electron').ipcRenderer.on('download-folder', (event, message) => {
+            down_path = path.join(message, 'ex_Downloader');
+            fs.mkdir(down_path, function(err) {});
+        })
        
     </script>
 </body>
