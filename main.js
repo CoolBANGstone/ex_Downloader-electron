@@ -3,9 +3,13 @@ const {
     BrowserWindow,
     dialog
 } = require('electron')
+const fs = require('fs');
 const url = require('url');
 const path = require('path');
+const open = require('open');
 const request = require('request');
+const pkg = require('./package.json');
+UserAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:68.0) Gecko/20100101 Firefox/68.0';
 
 app.on('ready', createWindow);
 
@@ -55,32 +59,44 @@ function createWindow() {
         win.webContents.send('download-folder', app.getPath('downloads'));
     })
     // Check new version
-    request({url: 'https://github.com/CoolBANGstone/ex_Downloader-electron/releases/latest'}, function(err, resp, body) {
+    request({
+        url: 'https://api.github.com/repos/coolbangstone/ex_Downloader-electron/releases/latest',
+        headers: {'User-Agent': UserAgent}}, function(err, resp, body) {
         if (err || resp.statusCode !== 200)
             return;
-        var keyword = '<span class=\"pl-2 flex-auto min-width-0 text-bold\">exDownloader-';
-        var index = body.indexOf(keyword) + keyword.length;
-        var current_version = app.getVersion();
-        var latest_version = '';
-        if (index < keyword.length)
-            return;
-        while (body[index] !== '.' || body[index + 1] !== 'd')
-            latest_version += body[index++];
+        body = JSON.parse(body);
+        current_version = pkg.version;
+        latest_version = body.name;
+        console.log(latest_version , current_version);
         if (current_version !== latest_version) {
             const options = {
                 type: 'question',
-                buttons: [ 'Yes, please', 'No, thanks'],
+                buttons: [ 'Yes', 'No'],
                 defaultId: 0,
                 title: 'Question',
-                message: `Do you want to update?`,
+                message: `Do you want to download now?`,
                 detail: `New version ${latest_version} found.`,
             };
             dialog.showMessageBox(null, options, (response) => {
-                console.log(response);
                 if (response === 0) {
-                    // console.log('Update');
-                    win.loadURL('https://github.com/CoolBANGstone/ex_Downloader-electron/releases/latest');
-                    win.maximize();
+                    var platform = process.platform === 'darwin' ? 0 : 1;
+                    var url = body.assets[platform].browser_download_url;
+                    var name = body.assets[platform].name;
+                    request({url: url}).on('error', function(err) {return;}).pipe(fs.createWriteStream(path.join(app.getPath('downloads'), name))).on('close', function() {
+                        const options = {
+                            type: 'question',
+                            buttons: [ 'Yes', 'No'],
+                            defaultId: 0,
+                            title: 'Question',
+                            message: `Download complete! Close and install update now?`,
+                        };
+                        dialog.showMessageBox(null, options, (response) => {
+                            if (response === 0) {
+                                open(path.join(app.getPath('downloads'), name));
+                                app.quit();
+                            }
+                        });
+                    });
                 }
             });
         }
