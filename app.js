@@ -6,6 +6,7 @@ const colors = require('colors');
 const request = require('request');
 const setCookie = require('set-cookie-parser');
 
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 var down_path = '';
 var stage = 1;
@@ -357,6 +358,7 @@ async function login(username, pass, test) {
                 };
             }catch(e) {
                 if (e) {
+                    console.log(e);
                     hide('send', false);
                     document.querySelector('.output').innerText = 'Login error, press enter to retry.';
                     document.getElementById('input').focus();
