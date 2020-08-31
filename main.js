@@ -9,6 +9,8 @@ const path = require('path');
 const open = require('open');
 const request = require('request');
 const pkg = require('./package.json');
+const progress = require('request-progress');
+const compareVersions = require('compare-versions');
 UserAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:68.0) Gecko/20100101 Firefox/68.0';
 
 app.on('ready', createWindow);
@@ -68,7 +70,7 @@ function createWindow() {
         current_version = pkg.version;
         latest_version = body.name;
         console.log(latest_version , current_version);
-        if (current_version !== latest_version) {
+        if (compareVersions(current_version, latest_version) === -1) {
             const options = {
                 type: 'question',
                 buttons: [ 'Yes', 'No'],
@@ -82,7 +84,15 @@ function createWindow() {
                     var platform = process.platform === 'darwin' ? 0 : 1;
                     var url = body.assets[platform].browser_download_url;
                     var name = body.assets[platform].name;
-                    request({url: url}).on('error', function(err) {return;}).pipe(fs.createWriteStream(path.join(app.getPath('downloads'), name))).on('close', function() {
+                    progress(request({url: url}), {
+                        throttle: 1000
+                    }).on('progress', function(state) {
+                        win.setProgressBar(state.percent);
+                        console.log(state);
+                    }).on('error', function(err) {
+                        return;
+                    }).pipe(fs.createWriteStream(path.join(app.getPath('downloads'), name))).on('close', function() {
+                        win.setProgressBar(-1);
                         const options = {
                             type: 'question',
                             buttons: [ 'Yes', 'No'],
